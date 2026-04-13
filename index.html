@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mapa Mental: Redes IT, IoT y TCP/IP</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+  :root {
+    --bg: #07090f;
+    --grid: rgba(255,255,255,0.03);
+    --it: #00d4ff;
+    --iot: #00ff9d;
+    --diff: #ff6b35;
+    --tcp: #b44bff;
+    --glow-it: 0 0 20px rgba(0,212,255,0.6);
+    --glow-iot: 0 0 20px rgba(0,255,157,0.6);
+    --glow-diff: 0 0 20px rgba(255,107,53,0.6);
+    --glow-tcp: 0 0 20px rgba(180,75,255,0.6);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    color: #e0e0e0;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── CABECERA ── */
+  .header-block {
+    text-align: center;
+    padding: 32px 20px 24px;
+    position: relative;
+    z-index: 1;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(0.95rem, 2.2vw, 1.3rem);
+    letter-spacing: 0.12em;
+    color: #fff;
+    text-transform: uppercase;
+    text-shadow: 0 0 30px rgba(255,255,255,0.25);
+    margin-bottom: 14px;
+  }
+
+  .fig-caption {
+    font-size: 0.83rem;
+    color: rgba(255,255,255,0.52);
+    line-height: 1.75;
+    font-style: italic;
+    margin-bottom: 10px;
+  }
+
+  .fig-meta {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.67rem;
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 0.14em;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    padding-top: 10px;
+    margin-top: 6px;
+  }
+
+  /* ── GRILLA PRINCIPAL ── */
+  .mind-map {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 20px 48px;
+    position: relative; z-index: 1;
+  }
+
+  .section.tcp  { grid-column: 1 / -1; }
+  .section.diff { grid-column: 1 / -1; }
+
+  .section {
+    border-radius: 4px;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+  }
+  .section:hover { transform: translateY(-2px); }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .section-header .icon { font-size: 1.3rem; line-height: 1; }
+  .section-header .tag {
+    margin-left: auto;
+    font-size: 0.58rem;
+    opacity: 0.6;
+    border: 1px solid currentColor;
+    padding: 2px 6px;
+    border-radius: 2px;
+    letter-spacing: 0.1em;
+  }
+
+  /* ── COLORES POR SECCIÓN ── */
+  .section.it   { border: 1px solid rgba(0,212,255,0.2);  box-shadow: var(--glow-it),  inset 0 0 40px rgba(0,212,255,0.03); }
+  .section.iot  { border: 1px solid rgba(0,255,157,0.2);  box-shadow: var(--glow-iot), inset 0 0 40px rgba(0,255,157,0.03); }
+  .section.diff { border: 1px solid rgba(255,107,53,0.2); box-shadow: var(--glow-diff),inset 0 0 40px rgba(255,107,53,0.03); }
+  .section.tcp  { border: 1px solid rgba(180,75,255,0.2); box-shadow: var(--glow-tcp), inset 0 0 40px rgba(180,75,255,0.03); }
+
+  .section.it   .section-header { background: rgba(0,212,255,0.12);  color: var(--it);   border-left: 3px solid var(--it);   }
+  .section.iot  .section-header { background: rgba(0,255,157,0.10);  color: var(--iot);  border-left: 3px solid var(--iot);  }
+  .section.diff .section-header { background: rgba(255,107,53,0.10); color: var(--diff); border-left: 3px solid var(--diff); }
+  .section.tcp  .section-header { background: rgba(180,75,255,0.10); color: var(--tcp);  border-left: 3px solid var(--tcp);  }
+
+  .section.it   .node-main { border-color: rgba(0,212,255,0.4);  background: rgba(0,212,255,0.05);  }
+  .section.iot  .node-main { border-color: rgba(0,255,157,0.4);  background: rgba(0,255,157,0.05);  }
+  .section.diff .node-main { border-color: rgba(255,107,53,0.4); background: rgba(255,107,53,0.05); }
+  .section.tcp  .node-main { border-color: rgba(180,75,255,0.4); background: rgba(180,75,255,0.05); }
+
+  .section.it   .node-main:hover { border-color: var(--it);   box-shadow: var(--glow-it);   }
+  .section.iot  .node-main:hover { border-color: var(--iot);  box-shadow: var(--glow-iot);  }
+  .section.diff .node-main:hover { border-color: var(--diff); box-shadow: var(--glow-diff); }
+  .section.tcp  .node-main:hover { border-color: var(--tcp);  box-shadow: var(--glow-tcp);  }
+
+  .section.it   .node-child { border-left-color: rgba(0,212,255,0.5);  }
+  .section.iot  .node-child { border-left-color: rgba(0,255,157,0.5);  }
+  .section.diff .node-child { border-left-color: rgba(255,107,53,0.5); }
+  .section.tcp  .node-child { border-left-color: rgba(180,75,255,0.5); }
+
+  .section.it   .badge { background: rgba(0,212,255,0.15);  color: var(--it);   border-color: rgba(0,212,255,0.3);  }
+  .section.iot  .badge { background: rgba(0,255,157,0.12);  color: var(--iot);  border-color: rgba(0,255,157,0.3);  }
+  .section.diff .badge { background: rgba(255,107,53,0.12); color: var(--diff); border-color: rgba(255,107,53,0.3); }
+  .section.tcp  .badge { background: rgba(180,75,255,0.12); color: var(--tcp);  border-color: rgba(180,75,255,0.3); }
+
+  .section-body { padding: 16px; background: rgba(0,0,0,0.4); }
+
+  /* ── NODOS ── */
+  .node-main {
+    border: 1px solid;
+    border-radius: 3px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+  .node-main-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .node-main-desc {
+    color: rgba(255,255,255,0.48);
+    line-height: 1.5;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+  }
+  .children { display: none; padding-left: 16px; margin-top: 8px; }
+  .children.open { display: block; }
+
+  .node-child {
+    border-left: 2px solid;
+    padding: 6px 10px;
+    margin-bottom: 6px;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.72);
+    line-height: 1.55;
+    transition: padding-left 0.2s;
+  }
+  .node-child:hover { padding-left: 14px; }
+  .node-child strong { color: rgba(255,255,255,0.95); display: block; font-size: 0.82rem; margin-bottom: 2px; }
+
+  .badge {
+    display: inline-block;
+    font-size: 0.56rem;
+    font-family: 'Space Mono', monospace;
+    padding: 1px 5px;
+    border: 1px solid;
+    border-radius: 2px;
+    letter-spacing: 0.08em;
+    vertical-align: middle;
+    margin-left: 6px;
+  }
+  .arrow {
+    margin-left: auto;
+    font-size: 0.7rem;
+    opacity: 0.45;
+    transition: transform 0.2s;
+    font-family: monospace;
+  }
+  .node-main.open .arrow { transform: rotate(90deg); }
+
+  /* ── TABLA DE DIFERENCIAS ── */
+  .diff-grid {
+    padding: 16px;
+    background: rgba(0,0,0,0.4);
+  }
+  .diff-header-row, .diff-row {
+    display: grid;
+    grid-template-columns: 160px 1fr 1fr;
+    gap: 8px;
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+  }
+  .diff-header-row {
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 8px;
+  }
+  .diff-row { border-bottom: 1px solid rgba(255,107,53,0.08); }
+  .diff-header-row span {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .diff-header-row .col-it  { color: var(--it);  }
+  .diff-header-row .col-iot { color: var(--iot); }
+  .diff-category {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.63rem;
+    color: var(--diff);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding-top: 4px;
+    opacity: 0.85;
+  }
+  .diff-it, .diff-iot {
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.55;
+    padding: 4px 8px;
+    border-radius: 2px;
+  }
+  .diff-it  { background: rgba(0,212,255,0.05);  border-left: 2px solid rgba(0,212,255,0.4);  }
+  .diff-iot { background: rgba(0,255,157,0.05);  border-left: 2px solid rgba(0,255,157,0.4);  }
+
+  /* ── CAPAS TCP/IP ── */
+  .layers-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    padding: 16px;
+    background: rgba(0,0,0,0.4);
+  }
+  .layer-card {
+    border: 1px solid rgba(180,75,255,0.25);
+    border-radius: 3px;
+    padding: 14px 12px;
+    background: rgba(180,75,255,0.04);
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .layer-card.mqtt-card {
+    border-color: rgba(180,75,255,0.6);
+    background: rgba(180,75,255,0.09);
+  }
+  .layer-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--tcp);
+    opacity: 0.5;
+  }
+  .layer-card.mqtt-card::before { opacity: 1; background: #d47fff; }
+  .layer-card:hover {
+    border-color: rgba(180,75,255,0.65);
+    box-shadow: 0 0 16px rgba(180,75,255,0.22);
+    transform: translateY(-2px);
+  }
+  .layer-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.58rem;
+    color: var(--tcp);
+    opacity: 0.75;
+    margin-bottom: 4px;
+    letter-spacing: 0.1em;
+  }
+  .layer-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 8px;
+    letter-spacing: 0.04em;
+  }
+  .layer-protocols {
+    display: flex; flex-wrap: wrap; gap: 4px;
+    margin-bottom: 10px;
+  }
+  .proto-tag {
+    background: rgba(180,75,255,0.15);
+    border: 1px solid rgba(180,75,255,0.3);
+    color: var(--tcp);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.56rem;
+    padding: 2px 5px;
+    border-radius: 2px;
+    letter-spacing: 0.05em;
+  }
+  .proto-tag.mqtt-tag {
+    background: rgba(180,75,255,0.4);
+    border-color: #d47fff;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.6rem;
+  }
+  .layer-func {
+    font-size: 0.74rem;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.6;
+  }
+  .mqtt-note {
+    margin-top: 12px;
+    padding: 9px 11px;
+    border: 1px solid rgba(180,75,255,0.45);
+    border-radius: 3px;
+    background: rgba(180,75,255,0.1);
+    font-size: 0.73rem;
+    color: rgba(255,255,255,0.72);
+    line-height: 1.6;
+  }
+  .mqtt-note strong { color: #d47fff; display: block; margin-bottom: 4px; font-size: 0.78rem; }
+
+  @media (max-width: 1000px) {
+    .mind-map { grid-template-columns: 1fr; }
+    .section.tcp, .section.diff { grid-column: 1; }
+    .layers-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 600px) {
+    .layers-grid { grid-template-columns: 1fr; }
+    .diff-header-row, .diff-row { grid-template-columns: 1fr; }
+    .diff-category { font-size: 0.6rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ① TÍTULO, DESCRIPCIÓN Y DATOS ACADÉMICOS -->
+<div class="header-block">
+  <h1>Redes IT Tradicionales, Redes IoT y Modelo TCP/IP</h1>
+  <p class="fig-caption">
+    Figura 1. Mapa mental interactivo que presenta los conceptos fundamentales de las redes IT tradicionales y
+    las redes IoT (Internet de las Cosas), sus principales diferencias, y las cuatro capas del modelo TCP/IP
+    con sus funciones y protocolos asociados. Se incluye la ubicación del protocolo MQTT dentro de la capa
+    de Aplicación del modelo TCP/IP y su relevancia en entornos IoT.
+    Haz clic en cada nodo para expandir su contenido.
+  </p>
+  <p class="fig-meta">
+    Estudiante: Julián Rosero &nbsp;·&nbsp; Materia: Arquitectura de Redes IoT &nbsp;·&nbsp; Grupo académico: 203458710_2
+  </p>
+</div>
+
+<div class="mind-map">
+
+  <!-- ═══ A. REDES IT ═══ -->
+  <div class="section it">
+    <div class="section-header">
+      <span class="icon">🖥️</span>
+      <span>A. Redes IT Tradicionales</span>
+      <span class="tag">Information Technology</span>
+    </div>
+    <div class="section-body">
+
+      <div class="node-main" onclick="toggle(this)">
+        <div class="node-main-title">Definición <span class="arrow">▶</span></div>
+        <div class="node-main-desc">Infraestructura de comunicación diseñada para procesar y transmitir datos entre computadoras, servidores y dispositivos de usuario final.</div>
+        <div class="children">
+          <div class="node-child"><strong>Propósito principal</strong>Interconectar equipos de cómputo con el objetivo de compartir recursos, servicios e información de manera eficiente y segura dentro de una organización.</div>
+          <div class="node-child"><strong>Entorno típico</strong>Oficinas corporativas, centros de datos, instituciones educativas y empresas de cualquier sector económico.</div>
+        </div>
+      </div>
+
+      <div class="node-main" onclick="toggle(this)">
+        <div class="node-main-title">Componentes principales <span class="arrow">▶</span></div>
+        <div class="node-main-desc">Equipos físicos y lógicos que conforman la infraestructura de red.</div>
+        <div class="children">
+          <div class="node-child"><strong>Routers</strong>Encaminan paquetes entre redes distintas y conectan la red local (LAN) con la red de área amplia (WAN) o con Internet.</div>
+          <div class="node-child"><strong>Switches</strong>Conmutan tramas en la capa de enlace de datos e interconectan los dispositivos que pertenecen a una misma LAN.</div>
+          <div class="node-child"><strong>Firewalls</strong>Controlan y filtran el tráfico entrante y saliente para proteger el perímetro de la organización frente a accesos no autorizados.</div>
+          <div class="node-child"><strong>Servidores</strong>Proveen servicios centralizados a los usuarios: DNS, DHCP, correo electrónico, web y bases de datos.</div>
+          <div class="node-child"><strong>Medios de transmisión</strong>Comprenden el cableado estructurado (Cat 5e/6/7), la fibra óptica y las redes inalámbricas Wi-Fi estándar 802.11.</div>
+        </div>
+      </div>
+
+      <div class="node-main" onclick="toggle(this)">
+        <div class="node-main-title">Protocolos comunes <span class="arrow">▶</span></div>
+        <div class="node-main-desc">Estándares de comunicación empleados en redes IT.</div>
+        <div class="children">
+          <div class="node-child"><strong>TCP/IP</strong>Suite de protocolos que constituye la base de Internet y de las redes empresariales modernas.</div>
+          <div class="node-child"><strong>HTTP / HTTPS</strong>Protocolo para la transferencia de páginas web y la comunicación con APIs; HTTPS incorpora cifrado mediante TLS.</div>
+          <div class="node-child"><strong>FTP / SFTP</strong>Permiten la transferencia de archivos entre equipos; SFTP añade autenticación y cifrado para mayor seguridad.</div>
+          <div class="node-child"><strong>SMTP / IMAP / POP3</strong>Protocolos encargados del envío (SMTP) y la recepción (IMAP, POP3) de correo electrónico.</div>
+          <div class="node-child"><strong>DNS / DHCP</strong>DNS traduce nombres de dominio a direcciones IP; DHCP asigna IPs de forma dinámica a los dispositivos de la red.</div>
+          <div class="node-child"><strong>BGP / OSPF</strong>Protocolos de enrutamiento dinámico utilizados en redes empresariales y en la infraestructura global de Internet.</div>
+        </div>
+      </div>
+
+      <div class="node-main" onclick="toggle(this)">
+        <div class="node-main-title">Características <span class="arrow">▶</span></div>
+        <div class="node-main-desc">Atributos que definen el comportamiento y el rendimiento de las redes IT.</div>
+        <div class="children">
+          <div class="node-child"><strong>Alta velocidad</strong>Las tasas de transferencia van desde 100 Mbps hasta 100 Gbps o más en el backbone corporativo.</div>
+          <div class="node-child"><strong>Baja latencia</strong>Están optimizadas para ofrecer respuesta en tiempo real tanto a las aplicaciones como a los usuarios finales.</div>
+          <div class="node-child"><strong>Seguridad robusta</strong>Emplean VPN, cifrado TLS, autenticación 802.1X y segmentación por VLAN para proteger la información.</div>
+          <div class="node-child"><strong>Administración centralizada</strong>Se gestionan mediante protocolos como SNMP y Syslog, así como herramientas SDN y plataformas de monitoreo de red.</div>
+          <div class="node-child"><strong>Escalabilidad planificada</strong>Se diseñan con arquitecturas jerárquicas organizadas en tres capas: Core, Distribución y Acceso.</div>
+        </div>
+      </div>
+
+      <div class="node-main" onclick="toggle(this)">
+        <div class="node-main-title">Topologías <span class="badge">DISEÑO</span> <span class="arrow">▶</span></div>
+        <div class="node-main-desc">Configuraciones físicas y lógicas que definen cómo se interconectan los nodos de la red.</div>
+        <div class="children">
+          <div class="node-child"><strong>Estrella</strong>Todos los nodos se conectan a un switch o hub central, lo que simplifica el mantenimiento y el diagnóstico de fallas.</div>
+          <div class="node-child"><strong>Árbol jerárquico</strong>Organiza los dispositivos en niveles: Core → Distribución → Acceso; es la topología típica de redes empresariales medianas y grandes.</div>
+          <div class="node-child"><strong>Malla</strong>Ofrece alta redundancia al conectar cada nodo con múltiples vecinos; se utiliza principalmente en WAN y centros de datos.</div>
+          <div class="node-child"><strong>Anillo</strong>Los nodos forman un circuito cerrado; fue empleada en tecnologías como Token Ring y sigue vigente en SONET/SDH sobre fibra óptica.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ B. REDES IoT ═══ -->
+  <div class="section iot">
+    <div class="section-header">
+      <span class="icon">📡</span>
+      <span>B. Redes IoT</span>
+      <span class="tag">Internet of Things</span>
+    </div>
+    <div class="section-body">
+
+      <div class="node-main" onclick="toggle(this)">
+        <div class="node-main-title">Definición <span class="arrow">▶</span></div>
+        <div class="node-main-desc">Red que interconecta objetos físicos dotados de sensores, software y conectividad para recopilar e intercambiar datos con otros sistemas a través de Internet.</div>
+        <div class="children">
+          <div class="node-child"><strong>Propósito principal</strong>Digitalizar el mundo físico conectando objetos cotidianos —sensores, actuadores, electrodomésticos, vehículos y maquinaria industrial— para automatizar procesos y tomar decisiones basadas en datos en tiempo real.</div>
+          <div class="node-child"><strong>Entorno típico</strong>Hogares inteligentes, fábricas (Industria 4.0), ciudades inteligentes, sector salud y agricultura de precisión.</div>
+        </div>
+      </div>
+
+      <div class="node-main" onclick="toggle(this)">
+        <div class="node-main-title">Dispositivos <span class="arrow">▶</span></div>
+        <div class="node-main-desc">Tipos de nodos finales que integran una red IoT.</div>
+        <div class="children">
+          <div class="node-child"><strong>Sensores</strong>Capturan variables del entorno físico, tales como temperatura, humedad, presión, nivel de luz, movimiento y posición GPS.</div>
+          <div class="node-child"><strong>Actuadores</strong>Ejecutan acciones físicas —activar motores, abrir válvulas, conmutar relés— a partir de las órdenes recibidas remotamente.</div>
+          <div class="node-child"><strong>Gateways IoT</strong>Concentran los datos provenientes de múltiples dispositivos y los retransmiten hacia la nube o el servidor central de procesamiento.</div>
+          <div class="node-child"><strong>Dispositivos de borde (edge)</strong>Realizan procesamiento local para reducir la latencia y disminuir el volumen de datos que se envían a la nube.</div>
+          <div class="node-child"><strong>Wearables</strong>Dispositivos portátiles como smartwatches, monitores de salud y rastreadores de actividad física.</div>
+        </div>
+      </div>
+
+      <div class="node-main" onclick="toggle(this)">
+        <div class="node-main-title">Protocolos IoT <span class="arrow">▶</span></div>
+        <div class="node-main-desc">Estándares de comunicación diseñados para dispositivos con recursos de hardware limitados.</div>
+        <div class="children">
+          <div class="node-child"><strong>MQTT</strong>Message Queuing Telemetry Transport. Protocolo ligero de mensajería basado en el modelo publicador/suscriptor (pub/sub) que opera en la capa de Aplicación del modelo TCP/IP. Es el protocolo más utilizado en IoT por su bajo consumo de ancho de banda y su tolerancia a conexiones inestables.</div>
+          <div class="node-child"><strong>CoAP</strong>Constrained Application Protocol. Protocolo de tipo REST sobre UDP, optimizado para redes con alta tasa de pérdida de paquetes y para dispositivos de muy baja potencia.</div>
+          <div class="node-child"><strong>Zigbee / Z-Wave</strong>Protocolos de red de malla inalámbrica de baja potencia, diseñados principalmente para aplicaciones de domótica e inmótica.</div>
+          <div class="node-child"><strong>LoRaWAN</strong>Protocolo de largo alcance (hasta 15 km en campo abierto) y ultra bajo consumo energético, ideal para ciudades inteligentes y agricultura de precisión.</div>
+          <div class="node-child"><strong>BLE</strong>Bluetooth Low Energy. Orientado a wearables, beacons y dispositivos de corto alcance que requieren baterías de larga duración.</div>
+          <div class="node-child"><strong>NB-IoT / LTE-M</strong>Estándares celulares de banda estrecha optimizados para IoT, que aprovechan la infraestructura 4G/5G existente para ofrecer cobertura amplia.</div>
+          <div class="node-child"><strong>AMQP</strong>Advanced Message Queuing Protocol. Protocolo de mensajería orientado a entornos IoT empresariales que demandan alta confiabilidad y trazabilidad.</div>
+        </div>
+      </div>
+
+      <div class="node-main" onclick="toggle(this)">
+        <div class="node-main-title">Arquitectura IoT <span class="arrow">▶</span></div>
+        <div class="node-main-desc">Modelo en capas que describe cómo se estructuran los sistemas IoT de extremo a extremo.</div>
+        <div class="children">
+          <div class="node-child"><strong>Capa de percepción</strong>Comprende los sensores y actuadores que interactúan directamente con el entorno físico para capturar o generar datos.</div>
+          <div class="node-child"><strong>Capa de red y transporte</strong>Se encarga de transmitir los datos capturados mediante tecnologías como Wi-Fi, redes celulares, LoRa o Zigbee.</div>
+          <div class="node-child"><strong>Capa de procesamiento</strong>Incluye el edge computing, el fog computing y los gateways locales, que procesan y filtran la información antes de enviarla a la nube.</div>
+          <div class="node-child"><strong>Capa de aplicación</strong>Abarca las plataformas cloud (AWS IoT, Azure IoT Hub, Google IoT Core), los dashboards de visualización y los sistemas de analítica de datos.</div>
+        </div>
+      </div>
+
+      <div class="node-main" onclick="toggle(this)">
+        <div class="node-main-title">Desafíos IoT <span class="badge">RETOS</span> <span class="arrow">▶</span></div>
+        <div class="node-main-desc">Problemáticas que limitan o condicionan el despliegue de redes IoT a gran escala.</div>
+        <div class="children">
+          <div class="node-child"><strong>Seguridad</strong>La enorme superficie de ataque generada por millones de dispositivos, muchos de ellos con capacidades limitadas de cifrado, representa un riesgo crítico para las infraestructuras.</div>
+          <div class="node-child"><strong>Interoperabilidad</strong>La coexistencia de múltiples estándares y fabricantes sin compatibilidad nativa dificulta la integración de los distintos ecosistemas IoT.</div>
+          <div class="node-child"><strong>Escalabilidad</strong>Gestionar la conectividad y el procesamiento de millones o billones de dispositivos de forma simultánea exige infraestructuras altamente escalables y automatizadas.</div>
+          <div class="node-child"><strong>Gestión del ciclo de vida</strong>Actualizar el firmware de dispositivos geográficamente distribuidos requiere mecanismos de actualización OTA (Over The Air) confiables y seguros.</div>
+          <div class="node-child"><strong>Privacidad</strong>La recolección masiva y continua de datos personales y de comportamiento plantea importantes retos éticos, legales y regulatorios.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ C. DIFERENCIAS ═══ -->
+  <div class="section diff">
+    <div class="section-header">
+      <span class="icon">⚡</span>
+      <span>C. Diferencias entre Redes IT e IoT</span>
+      <span class="tag">Comparativa</span>
+    </div>
+    <div class="diff-grid">
+      <div class="diff-header-row">
+        <span style="color:rgba(255,107,53,0.65)">Criterio</span>
+        <span class="col-it">🖥️ Redes IT Tradicionales</span>
+        <span class="col-iot">📡 Redes IoT</span>
+      </div>
+      <div class="diff-row">
+        <div class="diff-category">Dispositivos</div>
+        <div class="diff-it">Computadoras de escritorio, laptops, servidores y smartphones con alto poder de cómputo.</div>
+        <div class="diff-iot">Sensores, actuadores, microcontroladores y dispositivos embebidos con recursos muy restringidos.</div>
+      </div>
+      <div class="diff-row">
+        <div class="diff-category">Recursos de hardware</div>
+        <div class="diff-it">Alta capacidad: procesadores de varios núcleos, gigabytes de RAM y gran capacidad de almacenamiento.</div>
+        <div class="diff-iot">Muy limitados: CPU de pocos MHz, kilobytes de RAM y almacenamiento mínimo o inexistente.</div>
+      </div>
+      <div class="diff-row">
+        <div class="diff-category">Consumo de energía</div>
+        <div class="diff-it">Elevado; los dispositivos permanecen conectados a la corriente eléctrica de forma continua.</div>
+        <div class="diff-iot">Ultra bajo; los nodos funcionan con baterías que pueden durar meses o incluso años sin reemplazo.</div>
+      </div>
+      <div class="diff-row">
+        <div class="diff-category">Protocolos</div>
+        <div class="diff-it">TCP/IP, HTTP/S, FTP, SMTP, DNS: protocolos estándar de Internet con amplia disponibilidad y soporte.</div>
+        <div class="diff-iot">MQTT, CoAP, Zigbee, LoRaWAN: protocolos ligeros diseñados para operar bajo estrictas restricciones de recursos.</div>
+      </div>
+      <div class="diff-row">
+        <div class="diff-category">Conectividad</div>
+        <div class="diff-it">Ethernet (Gbps), Wi-Fi 802.11ac/ax y fibra óptica, con alta velocidad y estabilidad garantizada.</div>
+        <div class="diff-iot">LoRaWAN, NB-IoT, BLE y Zigbee, optimizados para equilibrar el alcance con el consumo energético.</div>
+      </div>
+      <div class="diff-row">
+        <div class="diff-category">Escala</div>
+        <div class="diff-it">Decenas o miles de dispositivos por organización, con gestión manual viable por parte de los administradores.</div>
+        <div class="diff-iot">Millones o billones de dispositivos a escala global, lo que exige gestión completamente automatizada.</div>
+      </div>
+      <div class="diff-row">
+        <div class="diff-category">Seguridad</div>
+        <div class="diff-it">Firewalls, VPN, TLS, autenticación multifactor e IDS/IPS conforman un esquema de protección robusto.</div>
+        <div class="diff-iot">Limitada por las capacidades del hardware; se apoya en firmas de código y cifrado ligero, con mayor exposición a ataques.</div>
+      </div>
+      <div class="diff-row">
+        <div class="diff-category">Ancho de banda</div>
+        <div class="diff-it">Alto; soporta transmisión de video en alta definición, transferencia de archivos de gran tamaño y aplicaciones en la nube.</div>
+        <div class="diff-iot">Bajo; los dispositivos envían pequeños paquetes de telemetría de forma periódica o ante la ocurrencia de eventos específicos.</div>
+      </div>
+      <div class="diff-row">
+        <div class="diff-category">Latencia</div>
+        <div class="diff-it">Baja y predecible, lo que resulta crítico para aplicaciones interactivas y servicios en tiempo real.</div>
+        <div class="diff-iot">Variable y generalmente tolerable; sin embargo, es un factor crítico en aplicaciones IoT industriales o de salud.</div>
+      </div>
+      <div class="diff-row">
+        <div class="diff-category">Administración</div>
+        <div class="diff-it">Centralizada y gestionada por administradores de red especializados mediante herramientas de gestión tradicionales.</div>
+        <div class="diff-iot">Automatizada a través de plataformas de gestión masiva y actualizaciones OTA para los dispositivos distribuidos.</div>
+      </div>
+      <div class="diff-row">
+        <div class="diff-category">Aplicaciones</div>
+        <div class="diff-it">ERP, correo corporativo, plataformas web, videoconferencia y gestión de bases de datos empresariales.</div>
+        <div class="diff-iot">Hogares y ciudades inteligentes, Industria 4.0, telemedicina, monitoreo ambiental y agricultura de precisión.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ D. MODELO TCP/IP ═══ -->
+  <div class="section tcp">
+    <div class="section-header">
+      <span class="icon">🔗</span>
+      <span>D. Capas del Modelo TCP/IP y Funciones Principales</span>
+      <span class="tag">4 Capas</span>
+    </div>
+    <div class="layers-grid">
+
+      <!-- Capa 1 -->
+      <div class="layer-card">
+        <div class="layer-num">CAPA 1 — INFERIOR</div>
+        <div class="layer-name">Acceso a la Red<br><small style="font-weight:400;font-size:0.72rem;color:rgba(255,255,255,0.42)">(Network Access / Link)</small></div>
+        <div class="layer-protocols">
+          <span class="proto-tag">Ethernet</span>
+          <span class="proto-tag">Wi-Fi 802.11</span>
+          <span class="proto-tag">ARP</span>
+          <span class="proto-tag">PPP</span>
+          <span class="proto-tag">HDLC</span>
+          <span class="proto-tag">Frame Relay</span>
+        </div>
+        <div class="layer-func">
+          <strong style="color:rgba(180,75,255,0.9);display:block;margin-bottom:5px">Funciones:</strong>
+          • Transmisión física de bits a través del medio de comunicación (cable, fibra óptica o señal de radio).<br>
+          • Direccionamiento físico de los dispositivos mediante la dirección <strong>MAC</strong>.<br>
+          • Detección y corrección de errores en el enlace mediante verificación CRC.<br>
+          • Control del acceso al medio compartido: CSMA/CD en Ethernet; CSMA/CA en Wi-Fi.<br>
+          • Encapsulación de los datos en tramas para su transmisión por el enlace físico.
+        </div>
+      </div>
+
+      <!-- Capa 2 -->
+      <div class="layer-card">
+        <div class="layer-num">CAPA 2</div>
+        <div class="layer-name">Internet<br><small style="font-weight:400;font-size:0.72rem;color:rgba(255,255,255,0.42)">(Network Layer)</small></div>
+        <div class="layer-protocols">
+          <span class="proto-tag">IPv4</span>
+          <span class="proto-tag">IPv6</span>
+          <span class="proto-tag">ICMP</span>
+          <span class="proto-tag">OSPF</span>
+          <span class="proto-tag">BGP</span>
+          <span class="proto-tag">RIP</span>
+        </div>
+        <div class="layer-func">
+          <strong style="color:rgba(180,75,255,0.9);display:block;margin-bottom:5px">Funciones:</strong>
+          • Direccionamiento lógico de los dispositivos en la red mediante direcciones <strong>IP</strong> (IPv4 e IPv6).<br>
+          • <strong>Enrutamiento</strong>: determinación y selección de la ruta óptima para entregar los paquetes entre redes distintas.<br>
+          • Fragmentación y reensamblado de paquetes según el MTU del enlace de red.<br>
+          • Control del tiempo de vida del paquete (TTL) para evitar bucles infinitos de enrutamiento.<br>
+          • Diagnóstico y reporte de errores en la red mediante ICMP (ping, traceroute).
+        </div>
+      </div>
+
+      <!-- Capa 3 -->
+      <div class="layer-card">
+        <div class="layer-num">CAPA 3</div>
+        <div class="layer-name">Transporte<br><small style="font-weight:400;font-size:0.72rem;color:rgba(255,255,255,0.42)">(Transport Layer)</small></div>
+        <div class="layer-protocols">
+          <span class="proto-tag">TCP</span>
+          <span class="proto-tag">UDP</span>
+          <span class="proto-tag">SCTP</span>
+          <span class="proto-tag">Puertos 0–65535</span>
+        </div>
+        <div class="layer-func">
+          <strong style="color:rgba(180,75,255,0.9);display:block;margin-bottom:5px">Funciones:</strong>
+          • <strong>TCP</strong>: proporciona una comunicación fiable y orientada a la conexión, con control de flujo, retransmisión de segmentos perdidos y establecimiento de sesión mediante el three-way handshake.<br>
+          • <strong>UDP</strong>: comunicación sin conexión y de baja sobrecarga, utilizado en streaming, VoIP y videojuegos en línea donde la velocidad prima sobre la fiabilidad.<br>
+          • Multiplexación de múltiples aplicaciones sobre una misma conexión de red mediante el uso de <strong>puertos</strong> (del 0 al 65535).<br>
+          • Segmentación de los datos en la emisión y reensamblado ordenado en la recepción.<br>
+          • Control de congestión para evitar la saturación de los recursos de la red.
+        </div>
+      </div>
+
+      <!-- ③ Capa 4 — MQTT destacado -->
+      <div class="layer-card mqtt-card">
+        <div class="layer-num">CAPA 4 — SUPERIOR</div>
+        <div class="layer-name">Aplicación<br><small style="font-weight:400;font-size:0.72rem;color:rgba(255,255,255,0.42)">(Application Layer)</small></div>
+        <div class="layer-protocols">
+          <span class="proto-tag mqtt-tag">★ MQTT (IoT)</span>
+          <span class="proto-tag">HTTP/S</span>
+          <span class="proto-tag">CoAP</span>
+          <span class="proto-tag">DNS</span>
+          <span class="proto-tag">SMTP</span>
+          <span class="proto-tag">FTP</span>
+          <span class="proto-tag">SSH</span>
+          <span class="proto-tag">DHCP</span>
+          <span class="proto-tag">SNMP</span>
+        </div>
+        <div class="layer-func">
+          <strong style="color:rgba(180,75,255,0.9);display:block;margin-bottom:5px">Funciones:</strong>
+          • Provee la interfaz directa entre la infraestructura de red y las aplicaciones del usuario final.<br>
+          • <strong>DNS</strong>: traduce nombres de dominio legibles por humanos a direcciones IP numéricas.<br>
+          • <strong>DHCP</strong>: asigna automáticamente una dirección IP y parámetros de red a cada dispositivo que se conecta.<br>
+          • Transferencia de contenido web (HTTP/S), correo electrónico (SMTP) y archivos (FTP).<br>
+          • Administración y monitoreo remoto de dispositivos mediante SSH y SNMP.
+        </div>
+        <div class="mqtt-note">
+          <strong>📌 Ubicación de MQTT en el modelo TCP/IP</strong>
+          MQTT (Message Queuing Telemetry Transport) es un protocolo de mensajería que pertenece a la <strong>capa de Aplicación</strong> del modelo TCP/IP. Para el transporte de sus mensajes, se apoya en <strong>TCP (capa 3)</strong>, lo que le garantiza la entrega fiable y ordenada de los datos. Opera bajo un modelo publicador/suscriptor (pub/sub) que depende de un broker central para distribuir los mensajes entre los dispositivos suscritos. Utiliza el puerto <strong>1883</strong> para conexiones sin cifrado y el puerto <strong>8883</strong> cuando se combina con TLS. Esta arquitectura lo hace especialmente adecuado para la telemetría IoT en redes inestables, de baja velocidad o con alto consumo energético.
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Encapsulamiento -->
+    <div style="padding: 0 16px 16px; background: rgba(0,0,0,0.4);">
+      <div style="border: 1px solid rgba(180,75,255,0.2); border-radius:3px; padding:14px; background: rgba(180,75,255,0.03);">
+        <div style="font-family:'Space Mono',monospace; font-size:0.62rem; color:var(--tcp); letter-spacing:0.12em; margin-bottom:10px;">PROCESO DE ENCAPSULAMIENTO TCP/IP</div>
+        <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; font-size:0.74rem;">
+          <div style="background:rgba(180,75,255,0.18);border:1px solid rgba(180,75,255,0.5);padding:7px 11px;border-radius:2px;color:#fff;">📄 Datos<br><span style="color:rgba(255,255,255,0.45);font-size:0.6rem">Capa de Aplicación</span></div>
+          <span style="color:rgba(255,255,255,0.3)">→</span>
+          <div style="background:rgba(180,75,255,0.12);border:1px solid rgba(180,75,255,0.35);padding:7px 11px;border-radius:2px;color:#fff;">📦 Segmento<br><span style="color:rgba(255,255,255,0.4);font-size:0.6rem">+ encabezado TCP/UDP</span></div>
+          <span style="color:rgba(255,255,255,0.3)">→</span>
+          <div style="background:rgba(180,75,255,0.09);border:1px solid rgba(180,75,255,0.3);padding:7px 11px;border-radius:2px;color:#fff;">📫 Paquete<br><span style="color:rgba(255,255,255,0.4);font-size:0.6rem">+ encabezado IP</span></div>
+          <span style="color:rgba(255,255,255,0.3)">→</span>
+          <div style="background:rgba(180,75,255,0.06);border:1px solid rgba(180,75,255,0.25);padding:7px 11px;border-radius:2px;color:#fff;">🗂️ Trama<br><span style="color:rgba(255,255,255,0.4);font-size:0.6rem">+ encabezado MAC</span></div>
+          <span style="color:rgba(255,255,255,0.3)">→</span>
+          <div style="background:rgba(180,75,255,0.04);border:1px solid rgba(180,75,255,0.2);padding:7px 11px;border-radius:2px;color:#fff;">⚡ Bits<br><span style="color:rgba(255,255,255,0.4);font-size:0.6rem">señal física</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function toggle(el) {
+  const children = el.querySelector('.children');
+  if (!children) return;
+  const isOpen = children.classList.toggle('open');
+  el.classList.toggle('open', isOpen);
+}
+</script>
+</body>
+</html>
